@@ -3,9 +3,9 @@ on:
   schedule:
     - cron: '0 9 3 2 *' # 매년 3월 2일 9시에 실행
     - cron: '0 9 1 8 *' # 매년 8월 1일 9시에 실행
-  push:
-    branches:
-      - main
+#  push: -- 임시 주석
+#    branches:
+#      - main
   workflow_dispatch:
 jobs:
   update:
