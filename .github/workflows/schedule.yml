@@ -1,0 +1,20 @@
+name: update lecture information
+on:
+  schedule:
+    - cron: '0 9 3 2 *' # 매년 3월 2일 9시에 실행
+    - cron: '0 9 1 8 *' # 매년 8월 1일 9시에 실행
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: action/checkout@v4
+      - name: update lecture
+        uses: bangnolmo/plan-up-db/@main
+        env:
+          CALL_BACK = ${{ secrets.CALL_BACK }}
+          ST_ID = ${{ secrets.ST_ID }}
+          ST_PW = ${{ secrets.ST_PW }}
