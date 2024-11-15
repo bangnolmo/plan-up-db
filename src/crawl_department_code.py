@@ -39,6 +39,16 @@ def check_format(size, check_size):
 
 
 def get_all_hakgwa_code(arr, prefix='', depth=0, before=0, url=make_url('A1000', 'expand')):
+    """
+    모든 학과 이름과 코드를 받아서 전달
+    ex) [(1414, 서울주간-대학-관광문화대학-관광경영학과)
+    :param arr: 학과 코드와 이름을 담을 배열
+    :param prefix: 최종 학과의 소속 (서울주간-대학-관광문화대학 여기에 해당)
+    :param depth: 학과 index 관리용
+    :param before: 학과 index 관리용
+    :param url: 파싱할 url
+    :return: None
+    """
 
     res = requests.post(url)
 
@@ -76,9 +86,6 @@ def get_all_hakgwa_code(arr, prefix='', depth=0, before=0, url=make_url('A1000',
         else:
             # 1와 2가 아닌 경우 : 트리 format 이 바뀌었음을 의미
             check_format(0, 1)
-
-
-
 
 
 if __name__ == "__main__":
