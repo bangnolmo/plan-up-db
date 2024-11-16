@@ -1,5 +1,5 @@
 import sqlite3
-from crawl_department_code import get_all_hakgwa_code
+from src.parser.crawl_department_code import get_all_hakgwa_code
 
 
 def test_for_crawling_department_and_save():
@@ -17,3 +17,7 @@ def test_for_crawling_department_and_save():
 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
+
+
+if __name__ == "__main__":
+    test_for_crawling_department_and_save()

@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 
-from login import login
+from src.utils.utils import login
 
 # get env
 load_dotenv()
