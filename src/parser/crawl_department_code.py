@@ -1,5 +1,4 @@
 import re
-from dataclasses import dataclass
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
@@ -8,14 +7,17 @@ from bs4 import BeautifulSoup
 def make_url(cd, action):
     """
     학과명 와 학과 코드를 파싱하기 위한 URL 획득
+
     :param cd: 학과 코드
     :param action: expand or fold (하위학과 요청 파라미터
     :return: 최종 요청 URL
     """
+
     year = datetime.today().year
     month = datetime.today().month
 
-    # 1학기의 경우 hakgi=10, 2학기의 경우 hakgi=20
+    # 1학기 : hakgi=10, 2학기 : hakgi=20
+    # 여름  : hakgi=15, 겨울  : hakgi=25
     hakgi = 10
     if month >= 8:
         hakgi = 20
@@ -29,6 +31,7 @@ def make_url(cd, action):
 def check_format(size, check_size):
     """
     사이트의 구조가 바뀌었는지 확인하는 함수
+
     :param size: 파싱을 통해 얻느 데이터의 크기
     :param check_size: 실제 얻어야 하는 데이터의 크기
     :return: None
@@ -42,6 +45,7 @@ def get_all_hakgwa_code(arr, prefix='', depth=0, before=0, url=make_url('A1000',
     """
     모든 학과 이름과 코드를 받아서 전달
     ex) [(1414, 서울주간-대학-관광문화대학-관광경영학과)
+
     :param arr: 학과 코드와 이름을 담을 배열
     :param prefix: 최종 학과의 소속 (서울주간-대학-관광문화대학 여기에 해당)
     :param depth: 학과 index 관리용
