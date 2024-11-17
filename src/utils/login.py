@@ -4,6 +4,14 @@ import time
 
 
 def login(driver, user_id, user_pw):
+    """
+    selenium을 kutis에 로그인하기
+
+    :param driver: chrome driver
+    :param user_id: 학생 ID
+    :param user_pw: 학생 PW
+    """
+
     driver.get("https://kutis.kyonggi.ac.kr/webkutis/view/indexWeb.jsp")
     time.sleep(1)
 

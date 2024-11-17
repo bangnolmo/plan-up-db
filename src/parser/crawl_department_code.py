@@ -1,24 +1,16 @@
 import re
-from dataclasses import dataclass
-from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
 
-def make_url(cd, action):
+def make_url(cd, action, year, hakgi):
     """
     학과명 와 학과 코드를 파싱하기 위한 URL 획득
+
     :param cd: 학과 코드
     :param action: expand or fold (하위학과 요청 파라미터
     :return: 최종 요청 URL
     """
-    year = datetime.today().year
-    month = datetime.today().month
-
-    # 1학기의 경우 hakgi=10, 2학기의 경우 hakgi=20
-    hakgi = 10
-    if month >= 8:
-        hakgi = 20
 
     # gubun : 학사(1), 석사로 나뉘어져 있는 거 같음.
     gubun = 1
@@ -29,6 +21,7 @@ def make_url(cd, action):
 def check_format(size, check_size):
     """
     사이트의 구조가 바뀌었는지 확인하는 함수
+
     :param size: 파싱을 통해 얻느 데이터의 크기
     :param check_size: 실제 얻어야 하는 데이터의 크기
     :return: None
@@ -38,18 +31,23 @@ def check_format(size, check_size):
         raise ValueError("학과 트리 구조가 바뀌었습니다.")
 
 
-def get_all_hakgwa_code(arr, prefix='', depth=0, before=0, url=make_url('A1000', 'expand')):
+def get_all_hakgwa_code(arr, year, hakgi, cd='A1000', action='expand', prefix='', depth=0, before=0):
     """
     모든 학과 이름과 코드를 받아서 전달
     ex) [(1414, 서울주간-대학-관광문화대학-관광경영학과)
+
     :param arr: 학과 코드와 이름을 담을 배열
+    :param year: 파싱할 년도
+    :param hakgi: 파싱할 학기
+    :param cd: 학과 코드 (기본 값으로 A1000을 가짐)
+    :param action: 학과 트리에서 수행할 액션 (expend, fold) 로 구성
     :param prefix: 최종 학과의 소속 (서울주간-대학-관광문화대학 여기에 해당)
     :param depth: 학과 index 관리용
     :param before: 학과 index 관리용
-    :param url: 파싱할 url
     :return: None
     """
 
+    url = make_url(cd, action, year, hakgi)
     res = requests.post(url)
 
     if res.status_code != 200:
@@ -79,10 +77,10 @@ def get_all_hakgwa_code(arr, prefix='', depth=0, before=0, url=make_url('A1000',
         # 1 의미 : 더 확장 가능 (대학을 의미), 2 의미 : 더 확장 불가 (학과를 의미)
         if stat == '1':
             new_pre = prefix + '-' + name
-            get_all_hakgwa_code(arr, new_pre, i + 1, len(all_elements) - i - 1, make_url(code, 'fold'))
+            get_all_hakgwa_code(arr, year, hakgi, code, 'fold', new_pre, i + 1, len(all_elements) - i - 1)
         elif stat == '2':
             # 학과 데이터 추가
-            arr.append((code, prefix[1:] + '-' + name))
+            arr.append([prefix[1:] + '-' + name, code])
         else:
             # 1와 2가 아닌 경우 : 트리 format 이 바뀌었음을 의미
             check_format(0, 1)
@@ -90,6 +88,6 @@ def get_all_hakgwa_code(arr, prefix='', depth=0, before=0, url=make_url('A1000',
 
 if __name__ == "__main__":
     res = []
-    get_all_hakgwa_code(res)
+    get_all_hakgwa_code(res, 2024, 20)
     for d in res:
         print(d)
