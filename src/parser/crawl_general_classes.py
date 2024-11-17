@@ -50,7 +50,7 @@ def get_all_jojik(driver, gyear, ghakgi):
     for jojik in jojiks:
         if jojik.text == "전체":
             continue
-        result.append([gyear, ghakgi, jojik.text])
+        result.append([gyear, ghakgi, jojik.text, 'NONE'])
 
     return result
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     result = get_all_jojik(driver, 2024, 20)
 
-
+    print(result[0])
 
     # res = get_all_general_classes(driver, 2024, 10)
     close_driver(driver)
