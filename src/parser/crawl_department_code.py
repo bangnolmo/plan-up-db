@@ -80,7 +80,7 @@ def get_all_hakgwa_code(arr, year, hakgi, cd='A1000', action='expand', prefix=''
             get_all_hakgwa_code(arr, year, hakgi, code, 'fold', new_pre, i + 1, len(all_elements) - i - 1)
         elif stat == '2':
             # 학과 데이터 추가
-            arr.append([year, hakgi, prefix[1:] + '-' + name, code])
+            arr.append([prefix[1:] + '-' + name, code])
         else:
             # 1와 2가 아닌 경우 : 트리 format 이 바뀌었음을 의미
             check_format(0, 1)

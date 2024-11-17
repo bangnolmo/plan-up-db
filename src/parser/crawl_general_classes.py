@@ -50,7 +50,7 @@ def get_all_jojik(driver, gyear, ghakgi):
     for jojik in jojiks:
         if jojik.text == "전체":
             continue
-        result.append([gyear, ghakgi, jojik.text, 'NONE'])
+        result.append([jojik.text, 'NONE'])
 
     return result
 
@@ -62,7 +62,7 @@ def get_all_general_classes(driver, gyear, ghakgi):
     :param driver:
     :param gyear:
     :param ghakgi:
-    :return:
+    :return: [[]...]
     """
     driver.get(general_base_url)
 
@@ -88,7 +88,6 @@ def get_all_general_classes(driver, gyear, ghakgi):
 
         # print(get_total_pages(driver))
         get_schedule_list(driver, result, jojik_name)
-        break
 
     return result
 
@@ -96,7 +95,7 @@ def get_all_general_classes(driver, gyear, ghakgi):
 if __name__ == "__main__":
     driver = get_chrome_driver_with_login()
 
-    result = get_all_jojik(driver, 2024, 20)
+    result = get_all_general_classes(driver, 2024, 20)
 
     print(result[0])
 
