@@ -50,7 +50,7 @@ def get_all_jojik(driver, gyear, ghakgi):
     for jojik in jojiks:
         if jojik.text == "전체":
             continue
-        result.append([jojik.text, 'NONE'])
+        result.append([jojik.text, jojik.get_attribute('value')])
 
     return result
 
@@ -59,10 +59,10 @@ def get_all_general_classes(driver, gyear, ghakgi):
     """
     모든 교양 과목 조회하기
 
-    :param driver:
-    :param gyear:
-    :param ghakgi:
-    :return: [[]...]
+    :param driver: Selenium WebDriver 인스턴스
+    :param gyear: 조회할 년도
+    :param ghakgi: 조회할 학기
+    :return: [[명세서 참조 부탁합니다. 명시하기에 너무 많음.]...]
     """
     driver.get(general_base_url)
 
@@ -80,26 +80,36 @@ def get_all_general_classes(driver, gyear, ghakgi):
             break
 
         jojik = jojiks[i]
-        jojik_name = jojik.text
+        jojik_code = jojik.get_attribute('value')
+
         jojik.click()
 
         # 검색
         driver.find_element(By.XPATH, '//*[text()="조회"]').click()
 
         # print(get_total_pages(driver))
-        get_schedule_list(driver, result, jojik_name)
+        get_schedule_list(driver, result, jojik_code)
 
-    return result
+        break
+
+    # 전공 과목의 포멧과 맞추기 위함.
+    renew_data = []
+    for r in result:
+        renew_data.append(r[1:])
+        renew_data[-1][0] = r[0]
+
+    return renew_data
 
 
 if __name__ == "__main__":
     driver = get_chrome_driver_with_login()
 
-    result = get_all_general_classes(driver, 2024, 20)
+    # result = get_all_jojik(driver, 2024, 20)
+    #
+    # print(result[0])
 
-    print(result[0])
-
-    # res = get_all_general_classes(driver, 2024, 10)
+    res = get_all_general_classes(driver, 2024, 10)
+    print(res[0])
     close_driver(driver)
     #
     # for r in res:

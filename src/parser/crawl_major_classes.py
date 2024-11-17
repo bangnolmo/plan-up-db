@@ -26,9 +26,9 @@ def sub_schedule_page(driver, res, total_page, gyear, ghakgi, hakgwa_cd, gwamok_
         get_schedule_list(driver, res, hakgwa_cd)
 
 
-def go_to_schedule_page(driver, res, gyear, ghakgi, hakgwa_cd, gwamok_name=""):
+def get_all_major_classes(driver, res, gyear, ghakgi, hakgwa_cd, gwamok_name=""):
     """
-    동적으로 URL을 생성하고 해당 페이지로 이동.
+    해당 학과의 모든 전공 과목을 파싱하는 함수
 
     :param driver: Selenium WebDriver 인스턴스
     :param res: 파싱 데이터를 저장할 list
@@ -47,18 +47,15 @@ def go_to_schedule_page(driver, res, gyear, ghakgi, hakgwa_cd, gwamok_name=""):
         sub_schedule_page(driver, res, total_page, gyear, ghakgi, hakgwa_cd, gwamok_name="")
 
 
-def get_all_major_classes(driver, hakgwa_cd_list, res, year, hakgi):
-    # start crawling
-    for d in hakgwa_cd_list:
-        go_to_schedule_page(driver, res, year, hakgi, d)
-
 
 if __name__ == "__main__":
     parse_data = []
 
     driver = get_chrome_driver_with_login()
-    get_all_major_classes(driver, ['85511'], parse_data, 2024, 20)
+    result = []
+    get_all_major_classes(driver, result, 2024, 20, '85511')
+    # get_all_major_classes(driver, ['85511'], parse_data, 2024, 20)
     close_driver(driver)
 
-    for r in parse_data:
+    for r in result:
         print(r)
