@@ -1,20 +1,82 @@
-name: update lecture information
+name: CI Pipeline
+
 on:
-  schedule:
-    - cron: '0 9 3 2 *' # 매년 3월 2일 9시에 실행
-    - cron: '0 9 1 8 *' # 매년 8월 1일 9시에 실행
-#  push: -- 임시 주석
-#    branches:
-#      - main
-  workflow_dispatch:
+    schedule:
+        - cron: "0 9 3 2 *" # 매년 3월 2일 9시에 실행
+        - cron: "0 9 1 8 *"
+    push:
+        branches:
+            - main
+            - feature/*
+    workflow_dispatch:
+
 jobs:
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: action/checkout@v4
-      - name: update lecture
-        uses: bangnolmo/plan-up-db/@main
+    build-and-run:
+        runs-on: ubuntu-20.04 # Dockerfile과 동일한 Ubuntu 버전 사용
+
         env:
-          CALL_BACK = ${{ secrets.CALL_BACK }}
-          ST_ID = ${{ secrets.ST_ID }}
-          ST_PW = ${{ secrets.ST_PW }}
+            DEBIAN_FRONTEND: noninteractive # 환경 변수 설정
+
+        steps:
+            # 1. 코드 체크아웃
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            # 2. Python 설정
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.8" # 필요에 따라 Python 버전 조정
+
+            # 3. 시스템 패키지 설치
+            - name: Install system dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y \
+                    wget \
+                    unzip \
+                    curl \
+                    gnupg \
+                    software-properties-common \
+                    python3-pip \
+                    python3-setuptools \
+                    python3-dev \
+                    xvfb
+
+            # 4. Google Chrome 설치
+            - name: Install Google Chrome
+              run: |
+                  wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+                  sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
+                  sudo apt-get update
+                  sudo apt-get install -y google-chrome-stable
+
+            # 5. Google Chrome 설치 확인 (디버깅용)
+            - name: Verify Google Chrome installation
+              run: google-chrome --version || echo "Chrome installation failed"
+
+            # 6. ChromeDriver 설치 (Chrome 버전에 맞춤)
+            - name: Install ChromeDriver
+              run: |
+                  CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+                  MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d '.' -f1)
+                  # ChromeDriver 최신 릴리스 버전 가져오기
+                  CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_VERSION}")
+                  wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
+                  unzip chromedriver_linux64.zip
+                  sudo mv chromedriver /usr/bin/chromedriver
+                  sudo chmod +x /usr/bin/chromedriver
+                  rm chromedriver_linux64.zip
+
+            # 7. Python 패키지 설치
+            - name: Install Python dependencies
+              run: |
+                  python3 -m pip install --upgrade pip
+                  pip3 install selenium
+                  if [ -f requirements.txt ]; then
+                    pip3 install --no-cache-dir -r requirements.txt
+                  fi
+
+            # 8. Python 스크립트 실행
+            - name: Run Python script
+              run: python3 ./src/crawl_major_classes.py
