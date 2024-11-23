@@ -28,7 +28,7 @@ jobs:
               with:
                   python-version: "3.8" # 필요에 따라 Python 버전 조정
 
-            # 3. 시스템 패키지 설치
+            # 3. 시스템 패키지 설치 (jq 포함)
             - name: Install system dependencies
               run: |
                   sudo apt-get update
@@ -41,7 +41,8 @@ jobs:
                     python3-pip \
                     python3-setuptools \
                     python3-dev \
-                    xvfb
+                    xvfb \
+                    jq # JSON 파싱 도구 설치
 
             # 4. Google Chrome 설치
             - name: Install Google Chrome
@@ -55,33 +56,31 @@ jobs:
             - name: Verify Google Chrome installation
               run: google-chrome --version || echo "Chrome installation failed"
 
-            # 6. ChromeDriver 설치 (수정됨)
+            # 6. ChromeDriver 설치 - 깃허브 링크 사용
             - name: Install ChromeDriver
               run: |
-                  # Chrome 버전 추출 (전체 버전 번호 포함)
-                  CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-                  echo "Chrome Version: $CHROME_VERSION"
+                  # latest-versions-per-milestone-with-downloads.json 다운로드
+                  wget https://github.com/GoogleChromeLabs/chrome-for-testing/raw/main/data/latest-versions-per-milestone-with-downloads.json -O latest_versions.json
 
-                  # 메이저 버전 추출
-                  MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d '.' -f1)
-                  echo "Chrome Major Version: $MAJOR_VERSION"
+                  # Chrome 버전 131에 맞는 ChromeDriver 다운로드 URL 추출
+                  CHROME_DRIVER_URL=$(jq -r '.["131"].downloads.chromedriver.linux' latest_versions.json)
+                  echo "ChromeDriver URL: $CHROME_DRIVER_URL"
 
-                  # ChromeDriver 최신 릴리스 버전 가져오기
-                  CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_VERSION}")
-                  echo "ChromeDriver Version: $CHROMEDRIVER_VERSION"
-
-                  # CHROMEDRIVER_VERSION이 유효한지 확인
-                  if [[ ! "$CHROMEDRIVER_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-                      echo "Failed to retrieve valid ChromeDriver version."
+                  # URL 유효성 검사
+                  if [[ "$CHROME_DRIVER_URL" == "null" || "$CHROME_DRIVER_URL" == "" ]]; then
+                      echo "ChromeDriver download URL not found for version 131."
                       exit 1
                   fi
 
-                  # ChromeDriver 다운로드 및 설치
-                  wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
+                  # ChromeDriver 다운로드
+                  wget "$CHROME_DRIVER_URL" -O chromedriver_linux64.zip
+
+                  # ChromeDriver 설치
                   unzip chromedriver_linux64.zip
                   sudo mv chromedriver /usr/bin/chromedriver
                   sudo chmod +x /usr/bin/chromedriver
                   rm chromedriver_linux64.zip
+                  rm latest_versions.json
 
             # 7. Python 패키지 설치
             - name: Install Python dependencies
