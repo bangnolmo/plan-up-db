@@ -1,14 +1,12 @@
-name: CI Pipeline
+name: Manual CI Pipeline
 
 on:
-    schedule:
-        - cron: "0 9 3 2 *" # 매년 3월 2일 9시에 실행
-        - cron: "0 9 1 8 *"
-    push:
-        branches:
-            - main
-            - feature/*
     workflow_dispatch:
+        inputs:
+            environment:
+                description: "환경 설정 (예: production, staging)"
+                required: false
+                default: "development"
 
 jobs:
     build-and-run:
@@ -55,13 +53,28 @@ jobs:
             - name: Verify Google Chrome installation
               run: google-chrome --version || echo "Chrome installation failed"
 
-            # 6. ChromeDriver 설치 (Chrome 버전에 맞춤)
+            # 6. ChromeDriver 설치 (수정됨)
             - name: Install ChromeDriver
               run: |
+                  # Chrome 버전 추출
                   CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+                  echo "Chrome Version: $CHROME_VERSION"
+
+                  # 메이저 버전 추출
                   MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d '.' -f1)
+                  echo "Chrome Major Version: $MAJOR_VERSION"
+
                   # ChromeDriver 최신 릴리스 버전 가져오기
-                  CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${MAJOR_VERSION}")
+                  CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$MAJOR_VERSION")
+                  echo "ChromeDriver Version: $CHROMEDRIVER_VERSION"
+
+                  # 버전 번호가 올바르게 추출되었는지 확인
+                  if [[ ! "$CHROMEDRIVER_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                    echo "Failed to retrieve valid ChromeDriver version."
+                    exit 1
+                  fi
+
+                  # ChromeDriver 다운로드 및 설치
                   wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
                   unzip chromedriver_linux64.zip
                   sudo mv chromedriver /usr/bin/chromedriver
