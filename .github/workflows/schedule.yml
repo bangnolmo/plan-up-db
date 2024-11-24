@@ -101,4 +101,6 @@ jobs:
                   ls -R src
             # 8. Python 스크립트 실행
             - name: Run Python script
-              run: python3 ./src/parser/crawl_major_classes.py
+              run: |
+                  export PYTHONPATH=$PYTHONPATH:$(pwd)
+                  python3 ./src/parser/crawl_major_classes.py
