@@ -16,9 +16,9 @@ jobs:
 
         env:
             DEBIAN_FRONTEND: noninteractive # 환경 변수 설정
-            USER_ID: ${{ secrets.USER_ID }}
-            USER_PW: ${{ secrets.USER_PW }}
-
+            ST_ID: ${{ secrets.USER_ID }}
+            ST_PW: ${{ secrets.USER_PW }}
+            BACK_URL: ${{ secrets.BACK_URL }}
         steps:
             # 1. 코드 체크아웃
             - name: Checkout repository
