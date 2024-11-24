@@ -56,7 +56,7 @@ jobs:
             - name: Verify Google Chrome installation
               run: google-chrome --version || echo "Chrome installation failed"
 
-            # 6. ChromeDriver 설치 (동적 설치)
+            # 6. ChromeDriver 설치
             - name: Install ChromeDriver
               run: |
                   # latest-versions-per-milestone-with-downloads.json 다운로드
@@ -83,7 +83,7 @@ jobs:
                   # ChromeDriver 다운로드 및 설치
                   wget "$CHROME_DRIVER_URL" -O chromedriver_linux64.zip
                   unzip chromedriver_linux64.zip
-                  sudo mv chromedriver /usr/bin/chromedriver
+                  sudo mv chromedriver-linux64/chromedriver /usr/bin/chromedriver
                   sudo chmod +x /usr/bin/chromedriver
                   rm chromedriver_linux64.zip latest_versions.json
 
