@@ -1,20 +1,106 @@
-name: update lecture information
+name: CI Pipeline
+
 on:
-  schedule:
-    - cron: '0 9 3 2 *' # 매년 3월 2일 9시에 실행
-    - cron: '0 9 1 8 *' # 매년 8월 1일 9시에 실행
-#  push: -- 임시 주석
-#    branches:
-#      - main
-  workflow_dispatch:
+    schedule:
+        - cron: "0 9 3 2 *" # 매년 2월 3일 09:00에 실행
+        - cron: "0 9 1 8 *" # 매년 8월 1일 09:00에 실행
+    push:
+        branches:
+            - main
+            - feature/*
+    workflow_dispatch:
+
 jobs:
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: action/checkout@v4
-      - name: update lecture
-        uses: bangnolmo/plan-up-db/@main
+    build-and-run:
+        runs-on: ubuntu-20.04 # Dockerfile과 동일한 Ubuntu 버전 사용
+
         env:
-          CALL_BACK = ${{ secrets.CALL_BACK }}
-          ST_ID = ${{ secrets.ST_ID }}
-          ST_PW = ${{ secrets.ST_PW }}
+            DEBIAN_FRONTEND: noninteractive # 환경 변수 설정
+
+        steps:
+            # 1. 코드 체크아웃
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            # 2. Python 설정
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.8" # 필요에 따라 Python 버전 조정
+
+            # 3. 시스템 패키지 설치 (jq 포함)
+            - name: Install system dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y \
+                    wget \
+                    unzip \
+                    curl \
+                    gnupg \
+                    software-properties-common \
+                    python3-pip \
+                    python3-setuptools \
+                    python3-dev \
+                    xvfb \
+                    jq # JSON 파싱 도구 설치
+
+            # 4. Google Chrome 설치
+            - name: Install Google Chrome
+              run: |
+                  wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+                  sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
+                  sudo apt-get update
+                  sudo apt-get install -y google-chrome-stable
+
+            # 5. Google Chrome 설치 확인 (디버깅용)
+            - name: Verify Google Chrome installation
+              run: google-chrome --version || echo "Chrome installation failed"
+
+            # 6. ChromeDriver 설치
+            - name: Install ChromeDriver
+              run: |
+                  # latest-versions-per-milestone-with-downloads.json 다운로드
+                  wget https://github.com/GoogleChromeLabs/chrome-for-testing/raw/main/data/latest-versions-per-milestone-with-downloads.json -O latest_versions.json
+
+                  # Chrome 버전 추출 (전체 버전 번호 포함)
+                  CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+                  echo "Chrome Version: $CHROME_VERSION"
+
+                  # 메이저 버전 추출
+                  MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d '.' -f1)
+                  echo "Chrome Major Version: $MAJOR_VERSION"
+
+                  # ChromeDriver 다운로드 URL 추출 (milestones 내에서 chromedriver.linux64.url)
+                  CHROME_DRIVER_URL=$(jq -r --arg v "$MAJOR_VERSION" '.milestones[$v].downloads.chromedriver[] | select(.platform == "linux64") | .url' latest_versions.json)
+                  echo "ChromeDriver URL: $CHROME_DRIVER_URL"
+
+                  # URL 유효성 검사
+                  if [[ "$CHROME_DRIVER_URL" == "null" || -z "$CHROME_DRIVER_URL" ]]; then
+                      echo "ChromeDriver download URL not found for version $MAJOR_VERSION."
+                      exit 1
+                  fi
+
+                  # ChromeDriver 다운로드 및 설치
+                  wget "$CHROME_DRIVER_URL" -O chromedriver_linux64.zip
+                  unzip chromedriver_linux64.zip
+                  sudo mv chromedriver-linux64/chromedriver /usr/bin/chromedriver
+                  sudo chmod +x /usr/bin/chromedriver
+                  rm chromedriver_linux64.zip latest_versions.json
+
+            # 7. Python 패키지 설치
+            - name: Install Python dependencies
+              run: |
+                  python3 -m pip install --upgrade pip
+                  pip3 install selenium
+                  if [ -f requirements.txt ]; then
+                    pip3 install --no-cache-dir -r requirements.txt
+                  fi
+
+            - name: Debug Python Path and Directory
+              run: |
+                  ls -R src
+            # 8. Python 스크립트 실행
+            - name: Run Python script
+              run: |
+                  export PYTHONPATH=$PYTHONPATH:$(pwd)
+                  python3 ./src/parser/crawl_major_classes.py
