@@ -98,4 +98,4 @@ jobs:
 
             # 8. Python 스크립트 실행
             - name: Run Python script
-              run: python3 ./src/crawl_major_classes.py
+              run: python3 ./src/parser/crawl_major_classes.py
