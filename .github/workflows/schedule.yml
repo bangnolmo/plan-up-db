@@ -96,6 +96,9 @@ jobs:
                     pip3 install --no-cache-dir -r requirements.txt
                   fi
 
+            - name: Debug Python Path and Directory
+              run: |
+                  ls -R src
             # 8. Python 스크립트 실행
             - name: Run Python script
               run: python3 ./src/parser/crawl_major_classes.py
