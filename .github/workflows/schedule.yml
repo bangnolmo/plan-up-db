@@ -16,6 +16,8 @@ jobs:
 
         env:
             DEBIAN_FRONTEND: noninteractive # 환경 변수 설정
+            USER_ID: ${{ secrets.USER_ID }}
+            USER_PW: ${{ secrets.USER_PW }}
 
         steps:
             # 1. 코드 체크아웃
