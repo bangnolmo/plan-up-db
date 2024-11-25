@@ -90,8 +90,6 @@ def get_all_general_classes(driver, gyear, ghakgi):
         # print(get_total_pages(driver))
         get_schedule_list(driver, result, jojik_code)
 
-        break
-
     # 전공 과목의 포멧과 맞추기 위함.
     renew_data = []
     for r in result:
