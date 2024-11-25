@@ -19,6 +19,7 @@ jobs:
             ST_ID: ${{ secrets.USER_ID }}
             ST_PW: ${{ secrets.USER_PW }}
             BACK_URL: ${{ secrets.BACK_URL }}
+            CRAWL_AUTH: ${{ secrets.CRAWL_AUTH }}
         steps:
             # 1. 코드 체크아웃
             - name: Checkout repository

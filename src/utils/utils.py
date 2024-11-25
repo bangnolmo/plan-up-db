@@ -12,6 +12,7 @@ load_dotenv()
 user_id = os.getenv("ST_ID")
 user_pw = os.getenv("ST_PW")
 BACK_URL = os.getenv("BACK_URL")
+CRAWL_AUTH = os.getenv("CRAWL_AUTH")
 
 
 def get_chrome_driver_with_login():
