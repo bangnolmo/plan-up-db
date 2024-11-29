@@ -75,8 +75,14 @@ def get_all_hakgwa_code(arr, year, hakgi, cd='A1000', action='expand', prefix=''
         stat = a_tag[1]['href'].split(',')[-1].replace(')', '').replace("'", '')
 
         # 1 의미 : 더 확장 가능 (대학을 의미), 2 의미 : 더 확장 불가 (학과를 의미)
+        # 더 확장이 되더라도 추가하기
         if stat == '1':
             new_pre = prefix + '-' + name
+
+            # 조직 데이터 추가
+            arr.append([new_pre[1:], code])
+
+            # 하위 조직으로 이동
             get_all_hakgwa_code(arr, year, hakgi, code, 'fold', new_pre, i + 1, len(all_elements) - i - 1)
         elif stat == '2':
             # 학과 데이터 추가
