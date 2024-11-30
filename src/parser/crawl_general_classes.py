@@ -42,6 +42,8 @@ def get_all_jojik(driver, gyear, ghakgi):
     result = []
 
     driver.get(general_base_url)
+    while driver.execute_script("return document.readyState") != "complete":
+        pass
 
     set_year_and_hakgi(driver, gyear, ghakgi)
 
@@ -64,7 +66,10 @@ def get_all_general_classes(driver, gyear, ghakgi):
     :param ghakgi: 조회할 학기
     :return: [[명세서 참조 부탁합니다. 명시하기에 너무 많음.]...]
     """
+
     driver.get(general_base_url)
+    while driver.execute_script("return document.readyState") != "complete":
+        pass
 
     set_year_and_hakgi(driver, gyear, ghakgi)
 

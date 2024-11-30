@@ -13,7 +13,8 @@ def login(driver, user_id, user_pw):
     """
 
     driver.get("https://kutis.kyonggi.ac.kr/webkutis/view/indexWeb.jsp")
-    time.sleep(1)
+    while driver.execute_script("return document.readyState") != "complete":
+        pass
 
     input_id = driver.find_element(By.XPATH, '//*[@id="id"]')
     input_pw = driver.find_element(By.XPATH, '//*[@id="pw"]')
