@@ -92,6 +92,9 @@ def get_all_general_classes(driver, gyear, ghakgi):
         # 검색
         driver.find_element(By.XPATH, '//*[text()="조회"]').click()
 
+        while driver.execute_script("return document.readyState") != "complete":
+            pass
+
         # print(get_total_pages(driver))
         get_schedule_list(driver, result, jojik_code)
 
