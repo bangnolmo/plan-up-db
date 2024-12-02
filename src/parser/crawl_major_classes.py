@@ -22,7 +22,11 @@ def sub_schedule_page(driver, res, total_page, gyear, ghakgi, hakgwa_cd, gwamok_
 
     for curPage in range(1, total_page + 1):
         url = f"{major_base_url}?curPage={curPage}&gyear={gyear}&ghakgi={ghakgi}&hakgwa_cd={hakgwa_cd}&gwamok_name={gwamok_name}"
+
         driver.get(url)
+        while driver.execute_script("return document.readyState") != "complete":
+            pass
+
         get_schedule_list(driver, res, hakgwa_cd)
 
 
@@ -40,7 +44,11 @@ def get_all_major_classes(driver, res, gyear, ghakgi, hakgwa_cd, gwamok_name="")
 
     # 총 페이지 획득
     url = f"{major_base_url}?curPage=1&gyear={gyear}&ghakgi={ghakgi}&hakgwa_cd={hakgwa_cd}&gwamok_name={gwamok_name}"
+
     driver.get(url)
+    while driver.execute_script("return document.readyState") != "complete":
+        pass
+
     total_page = get_total_pages(driver)
 
     if total_page is not None:
